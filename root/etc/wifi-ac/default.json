@@ -1,0 +1,8 @@
+{
+  "name": "默认模板",
+  "vendor": "default",
+  "config": {
+    "channel": "6",
+    "tx_power": 17
+  }
+}

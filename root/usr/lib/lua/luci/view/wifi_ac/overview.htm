@@ -1,0 +1,22 @@
+<%+header%>
+<style>
+#overview-stats, #overview-notify, #overview-signal { margin:8px 0; }
+#overview-trend { width:600px; height:240px; margin:10px 0; }
+#overview-quick button { margin-right:8px; }
+#overview-trend-ctrl { margin-bottom:6px; }
+</style>
+<h2>WiFi AC 概览</h2>
+<div id="overview-stats"></div>
+<div id="overview-notify" style="margin:10px 0;color:#409eff;"></div>
+<div id="overview-signal" style="width:320px;height:180px;display:inline-block;vertical-align:top;"></div>
+<div id="overview-trend-ctrl"></div>
+<div id="overview-trend" style="width:600px;height:240px;display:inline-block;vertical-align:top;"></div>
+<div id="overview-quick">
+  <button onclick="location.href='<%=luci.dispatcher.build_url("admin/network/wifi_ac/optimization")%>'">一键优化</button>
+  <button onclick="location.href='<%=luci.dispatcher.build_url("admin/network/wifi_ac/device_list")%>'">设备管理</button>
+  <button onclick="location.href='<%=luci.dispatcher.build_url("admin/network/wifi_ac/firmware")%>'">固件</button>
+  <button onclick="location.href='<%=luci.dispatcher.build_url("admin/network/wifi_ac/log")%>'">日志</button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5"></script>
+<script src="<%=resource%>/wifi-ac/js/main.js"></script>
+<%+footer%>

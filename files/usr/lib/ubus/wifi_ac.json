@@ -1,0 +1,27 @@
+{
+  "name": "wifi_ac",
+  "methods": [
+    {
+      "name": "get_status",
+      "parameters": []
+    },
+    {
+      "name": "publish_status_update",
+      "parameters": [
+        {
+          "name": "devices",
+          "type": "array",
+          "elements": {
+            "type": "object",
+            "properties": {
+              "mac": {"type": "string"},
+              "status": {"type": "string", "enum": ["online", "offline"]},
+              "reason": {"type": "string", "nullable": true},
+              "signal": {"type": "number", "minimum": -100, "maximum": 0}
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

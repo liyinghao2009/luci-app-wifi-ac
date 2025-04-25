@@ -1,0 +1,335 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: luci-app-wifi-ac\n"
+"Language: zh_CN\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "WiFi AC"
+msgstr "无线AC"
+
+msgid "Overview"
+msgstr "概览"
+
+msgid "Device List"
+msgstr "设备列表"
+
+msgid "Optimization"
+msgstr "优化"
+
+msgid "Firmware"
+msgstr "固件"
+
+msgid "Log"
+msgstr "日志"
+
+msgid "Settings"
+msgstr "设置"
+
+msgid "Enable"
+msgstr "启用"
+
+msgid "AC Name"
+msgstr "AC名称"
+
+msgid "AC Controller IP"
+msgstr "AC控制器IP"
+
+msgid "Subnet"
+msgstr "子网"
+
+msgid "Gateway"
+msgstr "网关"
+
+msgid "Network Mode"
+msgstr "网络模式"
+
+msgid "UDP端口"
+msgstr "UDP端口"
+
+msgid "UDP广播地址"
+msgstr "UDP广播地址"
+
+msgid "UDP超时时间(秒)"
+msgstr "UDP超时时间(秒)"
+
+msgid "UDP重试次数"
+msgstr "UDP重试次数"
+
+msgid "WebSocket端口"
+msgstr "WebSocket端口"
+
+msgid "日志级别"
+msgstr "日志级别"
+
+msgid "日志保留天数"
+msgstr "日志保留天数"
+
+msgid "趋势数据库路径"
+msgstr "趋势数据库路径"
+
+msgid "RADIUS服务器"
+msgstr "RADIUS服务器"
+
+msgid "RADIUS密钥"
+msgstr "RADIUS密钥"
+
+msgid "固件存储上限(MB)"
+msgstr "固件存储上限(MB)"
+
+msgid "保存设置"
+msgstr "保存设置"
+
+msgid "回读配置"
+msgstr "回读配置"
+
+msgid "测试RADIUS"
+msgstr "测试RADIUS"
+
+msgid "配置模板管理"
+msgstr "配置模板管理"
+
+msgid "权限管理"
+msgstr "权限管理"
+
+msgid "恢复出厂设置"
+msgstr "恢复出厂设置"
+
+msgid "存储空间信息"
+msgstr "存储空间信息"
+
+msgid "AP设备列表"
+msgstr "AP设备列表"
+
+msgid "搜索MAC/名称"
+msgstr "搜索MAC/名称"
+
+msgid "全部厂商"
+msgstr "全部厂商"
+
+msgid "全部状态"
+msgstr "全部状态"
+
+msgid "在线"
+msgstr "在线"
+
+msgid "离线"
+msgstr "离线"
+
+msgid "全部固件"
+msgstr "全部固件"
+
+msgid "批量重启"
+msgstr "批量重启"
+
+msgid "批量升级"
+msgstr "批量升级"
+
+msgid "批量同步"
+msgstr "批量同步"
+
+msgid "手动添加"
+msgstr "手动添加"
+
+msgid "MAC地址"
+msgstr "MAC地址"
+
+msgid "IP地址"
+msgstr "IP地址"
+
+msgid "厂商"
+msgstr "厂商"
+
+msgid "型号"
+msgstr "型号"
+
+msgid "固件"
+msgstr "固件"
+
+msgid "状态"
+msgstr "状态"
+
+msgid "CPU"
+msgstr "CPU"
+
+msgid "内存"
+msgstr "内存"
+
+msgid "2.4G接入量"
+msgstr "2.4G接入量"
+
+msgid "5G接入量"
+msgstr "5G接入量"
+
+msgid "操作"
+msgstr "操作"
+
+msgid "添加"
+msgstr "添加"
+
+msgid "取消"
+msgstr "取消"
+
+msgid "设备详情"
+msgstr "设备详情"
+
+msgid "上线时间"
+msgstr "上线时间"
+
+msgid "部署位置"
+msgstr "部署位置"
+
+msgid "信号强度"
+msgstr "信号强度"
+
+msgid "返回"
+msgstr "返回"
+
+msgid "性能优化"
+msgstr "性能优化"
+
+msgid "发射功率"
+msgstr "发射功率"
+
+msgid "一键优化"
+msgstr "一键优化"
+
+msgid "配置模板"
+msgstr "配置模板"
+
+msgid "优化进度"
+msgstr "优化进度"
+
+msgid "优化日志"
+msgstr "优化日志"
+
+msgid "固件升级管理"
+msgstr "固件升级管理"
+
+msgid "固件仓库"
+msgstr "固件仓库"
+
+msgid "文件名"
+msgstr "文件名"
+
+msgid "版本"
+msgstr "版本"
+
+msgid "MD5"
+msgstr "MD5"
+
+msgid "大小"
+msgstr "大小"
+
+msgid "上传固件"
+msgstr "上传固件"
+
+msgid "批量升级"
+msgstr "批量升级"
+
+msgid "开始升级"
+msgstr "开始升级"
+
+msgid "升级进度"
+msgstr "升级进度"
+
+msgid "日志系统"
+msgstr "日志系统"
+
+msgid "关键字"
+msgstr "关键字"
+
+msgid "全部类型"
+msgstr "全部类型"
+
+msgid "信息"
+msgstr "信息"
+
+msgid "警告"
+msgstr "警告"
+
+msgid "错误"
+msgstr "错误"
+
+msgid "用户"
+msgstr "用户"
+
+msgid "查询"
+msgstr "查询"
+
+msgid "导出CSV"
+msgstr "导出CSV"
+
+msgid "导出PDF"
+msgstr "导出PDF"
+
+msgid "时间"
+msgstr "时间"
+
+msgid "类型"
+msgstr "类型"
+
+msgid "消息"
+msgstr "消息"
+
+msgid "详情"
+msgstr "详情"
+
+msgid "告警"
+msgstr "告警"
+
+msgid "全局设置"
+msgstr "全局设置"
+
+msgid "恢复出厂设置并重启"
+msgstr "恢复出厂设置并重启"
+
+msgid "模板名称"
+msgstr "模板名称"
+
+msgid "模板配置"
+msgstr "模板配置"
+
+msgid "模板保存成功"
+msgstr "模板保存成功"
+
+msgid "模板已删除"
+msgstr "模板已删除"
+
+msgid "角色已保存"
+msgstr "角色已保存"
+
+msgid "删除成功(示例)"
+msgstr "删除成功(示例)"
+
+msgid "密码错误"
+msgstr "密码错误"
+
+msgid "设置已保存"
+msgstr "设置已保存"
+
+msgid "RADIUS连通成功"
+msgstr "RADIUS连通成功"
+
+msgid "RADIUS连通失败"
+msgstr "RADIUS连通失败"
+
+msgid "存储空间"
+msgstr "存储空间"
+
+msgid "概览"
+msgstr "概览"
+
+msgid "设备管理"
+msgstr "设备管理"
+
+msgid "日志"
+msgstr "日志"
+
+msgid "优化"
+msgstr "优化"
+
+msgid "固件"
+msgstr "固件"
+
+msgid "设置"
+msgstr "设置"

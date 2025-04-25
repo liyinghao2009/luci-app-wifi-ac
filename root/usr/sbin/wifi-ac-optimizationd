@@ -1,0 +1,6 @@
+#!/bin/sh
+
+while true; do
+    lua -e "require('luci.model.wifi_ac').process_optimization_queue()"
+    sleep 5
+done

@@ -1,0 +1,130 @@
+<%+header%>
+<style>
+#device-detail { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px #eee; padding: 24px; max-width: 800px; margin: 24px auto; }
+#device-detail h2 { font-size: 1.3em; margin-bottom: 18px; }
+#device-detail .info-row { display: flex; flex-wrap: wrap; margin-bottom: 10px; }
+#device-detail .info-row span { min-width: 160px; margin-right: 18px; margin-bottom: 6px; font-size: 15px; }
+#trend-chart-controls { margin: 16px 0; }
+#trend-chart { width: 100% !important; max-width: 700px; height: 240px; }
+@media (max-width: 900px) {
+  #device-detail { padding: 8px; }
+  #device-detail .info-row span { min-width: 120px; font-size: 13px; }
+  #trend-chart { max-width: 100%; }
+}
+</style>
+<div id="device-detail">
+  <h2><%:设备详情%></h2>
+  <div class="info-row">
+    <span id="detail-vendor"></span>
+    <span id="detail-model"></span>
+    <span id="detail-mac"></span>
+    <span id="detail-ip"></span>
+    <span id="detail-status"></span>
+    <span id="detail-firmware"></span>
+    <span id="detail-clients-24g"></span>
+    <span id="detail-clients-5g"></span>
+    <span id="detail-cpu"></span>
+    <span id="detail-mem"></span>
+    <span id="detail-uptime"></span>
+    <span id="detail-location"></span>
+    <span id="detail-signal"></span>
+  </div>
+  <div id="trend-chart-controls"></div>
+  <div>
+    <canvas id="trend-chart" width="700" height="240"></canvas>
+  </div>
+  <div id="offline-reason" style="color:#e67c23;margin:10px 0;"></div>
+  <button onclick="window.history.back()" style="margin-top:18px;background:#409eff;color:#fff;border:none;border-radius:3px;padding:6px 24px;cursor:pointer;"><%:返回%></button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+window.renderDeviceDetail = function(detail) {
+  document.getElementById('detail-vendor').innerText = _("厂商: ") + (detail.vendor || "");
+  document.getElementById('detail-model').innerText = _("型号: ") + (detail.model || "");
+  document.getElementById('detail-mac').innerText = "MAC: " + (detail.mac || "");
+  document.getElementById('detail-ip').innerText = "IP: " + (detail.ip || "");
+  document.getElementById('detail-status').innerText = _("状态: ") + (detail.status || "");
+  document.getElementById('detail-firmware').innerText = _("固件: ") + (detail.firmware || "");
+  document.getElementById('detail-clients-24g').innerText = "2.4G" + _("接入量: ") + ((detail.clients_24g !== undefined) ? detail.clients_24g : "");
+  document.getElementById('detail-clients-5g').innerText = "5G" + _("接入量: ") + ((detail.clients_5g !== undefined) ? detail.clients_5g : "");
+  document.getElementById('detail-cpu').innerText = "CPU: " + (detail.cpu || "") + "%";
+  document.getElementById('detail-mem').innerText = _("内存: ") + (detail.mem || "") + "%";
+  document.getElementById('detail-uptime').innerText = _("上线时间: ") + (detail.uptime || "");
+  document.getElementById('detail-location').innerText = _("部署位置: ") + (detail.location || "");
+  document.getElementById('detail-signal').innerText = _("信号强度: ") + (detail.signal || "");
+  // 离线原因
+  if (detail.status !== "online" && detail.offline_reason) {
+    document.getElementById('offline-reason').innerText = _("离线原因: ") + (detail.offline_reason.text || detail.offline_reason.reason || "");
+  } else {
+    document.getElementById('offline-reason').innerText = "";
+  }
+  // 趋势图控件
+  renderTrendChartControls(detail);
+  // 默认渲染趋势图
+  renderTrendChart(detail, "cpu");
+};
+
+function renderTrendChartControls(detail) {
+  let ctrl = document.getElementById("trend-chart-controls");
+  ctrl.innerHTML = `
+    <label><input type="radio" name="trend-metric" value="cpu" checked>${_("CPU")}</label>
+    <label><input type="radio" name="trend-metric" value="mem">${_("内存")}</label>
+    <label><input type="radio" name="trend-metric" value="clients_24g">${_("2.4G接入量")}</label>
+    <label><input type="radio" name="trend-metric" value="clients_5g">${_("5G接入量")}</label>
+    <button id="trend-export-btn">${_("导出CSV")}</button>
+  `;
+  ctrl.querySelectorAll("input[name=trend-metric]").forEach(radio => {
+    radio.onchange = function() {
+      renderTrendChart(detail, radio.value);
+    };
+  });
+  document.getElementById("trend-export-btn").onclick = function() {
+    exportTrendChartCSV(detail);
+  };
+}
+
+function renderTrendChart(detail, metric) {
+  let ctx = document.getElementById('trend-chart').getContext('2d');
+  if (window._trendChart) window._trendChart.destroy();
+  let labels = (detail.trend && detail.trend.time) || [];
+  let data = [];
+  let label = "";
+  switch (metric) {
+    case "cpu": data = (detail.trend && detail.trend.cpu) || []; label = _("CPU"); break;
+    case "mem": data = (detail.trend && detail.trend.mem) || []; label = _("内存"); break;
+    case "clients_24g": data = (detail.trend && detail.trend.clients_24g) || []; label = _("2.4G接入量"); break;
+    case "clients_5g": data = (detail.trend && detail.trend.clients_5g) || []; label = _("5G接入量"); break;
+  }
+  window._trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: label, data: data, borderColor: '#409eff', backgroundColor: 'rgba(64,158,255,0.1)', fill: true }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: true } },
+      scales: { x: { display: true }, y: { display: true } }
+    }
+  });
+}
+
+function exportTrendChartCSV(detail) {
+  let csv = "时间,CPU,内存,2.4G接入量,5G接入量\n";
+  let t = (detail.trend && detail.trend.time) || [];
+  let cpu = (detail.trend && detail.trend.cpu) || [];
+  let mem = (detail.trend && detail.trend.mem) || [];
+  let c24 = (detail.trend && detail.trend.clients_24g) || [];
+  let c5 = (detail.trend && detail.trend.clients_5g) || [];
+  for (let i = 0; i < t.length; i++) {
+    csv += [t[i], cpu[i] || "", mem[i] || "", c24[i] || "", c5[i] || ""].join(",") + "\n";
+  }
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], {type: "text/csv"}));
+  a.download = "ap_trend.csv";
+  a.click();
+}
+</script>
+<%+footer%>

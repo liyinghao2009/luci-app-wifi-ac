@@ -1,0 +1,8 @@
+{
+  "name": "华为标准模板",
+  "vendor": "huawei",
+  "config": {
+    "channel": "1",
+    "tx_power": 20
+  }
+}

@@ -1,0 +1,84 @@
+<%+header%>
+<style>
+/* 跟随LuCI主题风格优化表格和按钮 */
+.cbi-map { background: #fff; border-radius: 6px; box-shadow: 0 2px 8px #eee; padding: 24px; margin-top: 20px; }
+.cbi-map h2 { font-size: 1.3em; margin-bottom: 18px; }
+.cbi-map input[type="text"], .cbi-map select {
+  border: 1px solid #ccc; border-radius: 3px; padding: 4px 8px; margin-right: 8px; height: 28px;
+}
+.cbi-map button {
+  background: #409eff; color: #fff; border: none; border-radius: 3px; padding: 5px 16px; margin-right: 6px; cursor: pointer;
+  transition: background 0.2s;
+}
+.cbi-map button:hover { background: #66b1ff; }
+.table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+.table th, .table td { border: 1px solid #e5e5e5; padding: 7px 6px; text-align: center; }
+.table th { background: #f5f7fa; color: #333; }
+.label-success { background: #67c23a; color: #fff; border-radius: 2px; padding: 2px 8px; }
+.label-default { background: #dcdfe6; color: #888; border-radius: 2px; padding: 2px 8px; }
+progress { height: 12px; vertical-align: middle; }
+#device-table-wrap { overflow-x: auto; width: 100%; }
+@media (max-width: 900px) {
+  .table th, .table td { font-size: 12px; padding: 4px 2px; }
+  .cbi-map { padding: 8px; }
+  #device-table-wrap { padding: 0; }
+}
+.add-device-form { display:none; margin:10px 0; background:#f9f9f9; border-radius:4px; padding:10px; }
+.add-device-form input, .add-device-form select { margin-right:8px; }
+</style>
+<div class="cbi-map">
+  <h2><%:AP设备列表%></h2>
+  <div>
+    <input type="text" id="search" placeholder="<%:搜索MAC/名称%>">
+    <select id="vendor-filter"><option value=""><%:全部厂商%></option></select>
+    <select id="status-filter"><option value=""><%:全部状态%></option><option value="online"><%:在线%></option><option value="offline"><%:离线%></option></select>
+    <select id="firmware-filter"><option value=""><%:全部固件%></option></select>
+    <button id="batch-reboot"><%:批量重启%></button>
+    <button id="batch-upgrade"><%:批量升级%></button>
+    <button id="batch-sync"><%:批量同步%></button>
+    <button id="show-add-device"><%:手动添加%></button>
+  </div>
+  <div>
+    <button id="discover-udp"><%:UDP自动发现%></button>
+    <button id="discover-mdns"><%:mDNS发现%></button>
+    <button id="discover-http"><%:HTTP注册发现%></button>
+    <span id="discover-progress" style="margin-left:10px;color:#409eff;"></span>
+  </div>
+  <div class="add-device-form" id="add-device-form">
+    <input type="text" id="add-mac" placeholder="<%:MAC地址%>">
+    <input type="text" id="add-ip" placeholder="<%:IP地址%>">
+    <select id="add-vendor"></select>
+    <select id="add-model"></select>
+    <input type="text" id="add-firmware" placeholder="<%:固件%>">
+    <button id="add-device-btn"><%:添加%></button>
+    <button id="cancel-add-device"><%:取消%></button>
+  </div>
+  <div id="device-table-wrap">
+    <table id="device-table" class="table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="select-all"></th>
+          <th><%:厂商%></th>
+          <th><%:型号%></th>
+          <th><%:MAC%></th>
+          <th><%:IP地址%></th>
+          <th><%:状态%></th>
+          <th><%:CPU%></th>
+          <th><%:内存%></th>
+          <th><%:2.4G接入量%></th>
+          <th><%:5G接入量%></th>
+          <th><%:固件%></th>
+          <th><%:操作%></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- JS渲染 -->
+      </tbody>
+    </table>
+  </div>
+  <!-- 批量操作进度条、失败重试、自动发现弹窗等由JS动态渲染 -->
+  <div id="batch-progress" style="margin:10px 0;color:#409eff;"></div>
+  <div id="trend-chart-controls"></div>
+</div>
+<script src="<%=resource%>/wifi-ac/js/device.js"></script>
+<%+footer%>

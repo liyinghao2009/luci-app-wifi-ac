@@ -1,0 +1,8 @@
+{
+  "name": "TP-Link标准模板",
+  "vendor": "tp-link",
+  "config": {
+    "channel": "11",
+    "tx_power": 18
+  }
+}

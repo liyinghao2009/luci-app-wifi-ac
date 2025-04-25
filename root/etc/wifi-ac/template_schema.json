@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "required": ["name", "vendor", "config"],
+  "properties": {
+    "name": {"type": "string"},
+    "vendor": {"type": "string"},
+    "config": {
+      "type": "object",
+      "properties": {
+        "channel": {
+          "type": "string",
+          "pattern": "^[1-9]$|^1[0-4]$|^[36-9]$|^1[0-5][0-9]$|^16[0-5]$"
+        },
+        "tx_power": {
+          "type": "number",
+          "minimum": 10,
+          "maximum": 30
+        }
+      },
+      "required": ["channel", "tx_power"]
+    }
+  }
+}

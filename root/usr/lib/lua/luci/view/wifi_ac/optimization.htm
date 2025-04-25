@@ -1,0 +1,56 @@
+<%+header%>
+<style>
+#opt-panel { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px #eee; padding: 24px; max-width: 1000px; margin: 24px auto; }
+#heatmap { width: 100%; max-width: 900px; height: 320px; margin-bottom: 20px; }
+.ap-card { display: inline-block; vertical-align: top; background: #f9f9f9; border-radius: 6px; box-shadow: 0 1px 6px #eee; margin: 8px 12px 8px 0; padding: 14px 18px; min-width: 220px; }
+.ap-card h3 { font-size: 1.1em; margin-bottom: 8px; }
+.power-control label { font-size: 14px; }
+#template-select { margin: 0 8px 0 0; }
+#optimize-btn, #apply-template-btn, #manual-opt-btn, #set-threshold-btn { background: #409eff; color: #fff; border: none; border-radius: 3px; padding: 6px 18px; margin-right: 8px; cursor: pointer; }
+#opt-progress-bar { width: 100%; height: 14px; background: #eee; border-radius: 7px; margin: 14px 0; overflow: hidden; }
+#opt-progress-bar-inner { height: 14px; background: #67c23a; border-radius: 7px; transition: width 0.4s; }
+#opt-log { background: #f5f7fa; border-radius: 4px; min-height: 60px; padding: 8px 12px; font-size: 13px; color: #333; margin-bottom: 12px; white-space: pre-line; }
+#trend-chart { width: 100%; max-width: 900px; height: 260px; margin: 18px 0; }
+@media (max-width: 900px) {
+  #opt-panel { padding: 8px; }
+  .ap-card { min-width: 140px; padding: 8px 6px; }
+  #heatmap, #trend-chart { max-width: 100%; }
+}
+</style>
+<div id="opt-panel">
+  <h2>性能优化</h2>
+  <div id="heatmap"></div>
+  <div id="ap-power-list">
+    <% for _, ap in ipairs(aps or {}) do %>
+      <div class="ap-card">
+        <h3><%=ap.model%> (<%=ap.mac%>)</h3>
+        <div class="power-control">
+          <label>发射功率（<%=ap.vendor%>）：
+            <span id="power-val-<%=ap.mac%>"><%=ap.txpower or 20%></span>
+          </label>
+          <div id="txpower-box-<%=ap.mac%>"></div>
+          <script>
+            renderTxPowerInput("<%=ap.vendor%>", "<%=ap.model%>", "<%=ap.mac%>", <%=ap.txpower or 20%>);
+          </script>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div style="margin:18px 0;">
+    <select id="template-select"></select>
+    <button id="apply-template-btn">批量应用模板</button>
+    <button id="manual-opt-btn">手动信道/功率分配</button>
+    <button id="set-threshold-btn">设置负载均衡阈值</button>
+    <button id="optimize-btn">一键优化</button>
+  </div>
+  <div id="opt-progress-bar"><div id="opt-progress-bar-inner" style="width:0%"></div></div>
+  <div id="opt-log"></div>
+  <div id="trend-chart-controls"></div>
+  <div>
+    <canvas id="trend-chart"></canvas>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="<%=resource%>/wifi-ac/js/optimization.js"></script>
+<%+footer%>

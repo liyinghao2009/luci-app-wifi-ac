@@ -1,0 +1,15 @@
+{
+  "template_id": "high_coverage_2.4g",
+  "name": "高覆盖模式",
+  "description": "低干扰信道+低功率",
+  "vendor": "tp-link",
+  "config": {
+    "channel": 11,
+    "tx_power": 14,
+    "beamforming": "low",
+    "load_balance": {
+      "threshold": 40,
+      "strategy": "power_adjust"
+    }
+  }
+}

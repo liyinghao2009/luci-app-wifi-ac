@@ -1,0 +1,24 @@
+#!/bin/sh /etc/rc.common
+START=99
+
+start() {
+    /usr/bin/wifi_acd &
+}
+
+stop() {
+    killall wifi_acd
+}
+
+-- 在 WebSocket 连接建立/断开/推送失败处调用
+local function ws_log(msg)
+    local f = io.open("/var/log/wifi-ac/websocket.log", "a")
+    if f then
+        f:write(os.date("%Y-%m-%d %H:%M:%S") .. " " .. msg .. "\n")
+        f:close()
+    end
+end
+-- ws_log("WebSocket connected from " .. remote_ip)
+-- ws_log("WebSocket closed")
+-- ws_log("WebSocket push failed: " .. err)
+
+

@@ -1,0 +1,9 @@
+{
+  "name": "VLAN模板示例",
+  "vendor": "default",
+  "config": {
+    "channel": "6",
+    "tx_power": 20,
+    "vlan_id": 100
+  }
+}

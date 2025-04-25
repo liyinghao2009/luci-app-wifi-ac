@@ -1,0 +1,32 @@
+#!/bin/sh
+
+DB="/etc/wifi-ac/performance.db"
+[ -d /etc/wifi-ac ] || mkdir -p /etc/wifi-ac
+[ -d /tmp/wifi-ac ] || mkdir -p /tmp/wifi-ac   # 修复点
+
+init_db() {
+	sqlite3 "$DB" "CREATE TABLE IF NOT EXISTS performance (
+		timestamp INTEGER,
+		ap_mac TEXT,
+		load_percent REAL,
+		signal_dbm INTEGER,
+		channel INTEGER
+	);"
+}
+
+collect_once() {
+	for mac in $(uci show wifi_ac | grep ".mac=" | cut -d"'" -f2); do
+		status=$(ubus call wifi.status "{\"mac\":\"$mac\"}")
+		load=$(echo "$status" | jsonfilter -e '@.cpu')
+		signal=$(echo "$status" | jsonfilter -e '@.signal')
+		channel=$(echo "$status" | jsonfilter -e '@.channel')
+		now=$(date +%s)
+		sqlite3 "$DB" "INSERT INTO performance (timestamp,ap_mac,load_percent,signal_dbm,channel) VALUES ($now,'$mac',$load,$signal,$channel);"
+	done
+}
+
+init_db
+while true; do
+	collect_once
+	sleep 60
+done

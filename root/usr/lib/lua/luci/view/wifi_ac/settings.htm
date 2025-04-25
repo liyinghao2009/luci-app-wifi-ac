@@ -1,0 +1,190 @@
+<%+header%>
+<style>
+#settings-panel { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px #eee; padding: 24px; max-width: 800px; margin: 24px auto; }
+#settings-panel h2 { font-size: 1.3em; margin-bottom: 18px; }
+#settings-form { display: flex; flex-wrap: wrap; gap: 16px 24px; }
+#settings-form label { flex: 1 1 220px; margin: 0; font-size: 15px; }
+#settings-form input, #settings-form select { margin-left: 8px; min-width: 120px; border-radius: 3px; border: 1px solid #ccc; padding: 3px 8px; }
+#settings-form button { margin: 12px 8px 0 0; background: #409eff; color: #fff; border: none; border-radius: 3px; padding: 6px 18px; cursor: pointer; }
+#settings-form button:active { background: #66b1ff; }
+#settings-msg { margin:10px 0; color:#409eff; }
+#settings-actions { margin: 18px 0 0 0; display: flex; flex-wrap: wrap; gap: 12px; }
+#settings-actions button { background: #67c23a; color: #fff; border: none; border-radius: 3px; padding: 6px 18px; cursor: pointer; }
+#settings-actions button:active { background: #85ce61; }
+#log-storage-usage { color:#888; margin:10px 0 0 0; font-size:13px; }
+#template-manage-view { margin: 24px 0 0 0; display: none; }
+#template-list { display: flex; flex-wrap: wrap; gap: 18px; }
+.template-card {
+  flex: 1 1 320px;
+  min-width: 280px;
+  max-width: 380px;
+  background: #f8f9fb;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #eee;
+  padding: 16px 18px 12px 18px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.template-card h4 { margin: 0 0 8px 0; font-size: 1.08em; color: #409eff; }
+.template-card .tpl-vendor { color: #888; font-size: 13px; margin-bottom: 6px; }
+.template-card pre { background: #fff; border-radius: 4px; padding: 8px; font-size: 12px; overflow-x: auto; margin: 0 0 8px 0; }
+.template-card .tpl-actions { margin-top: 8px; }
+.template-card button { background: #409eff; color: #fff; border: none; border-radius: 3px; padding: 3px 12px; margin-right: 8px; cursor: pointer; }
+.template-card button:active { background: #66b1ff; }
+#add-template-btn { background: #67c23a; }
+#add-template-form { background: #f5f7fa; border-radius: 8px; padding: 18px; margin: 18px 0; display: none; }
+#add-template-form input, #add-template-form textarea, #add-template-form select { margin: 4px 0 12px 0; width: 100%; border-radius: 3px; border: 1px solid #ccc; padding: 4px 8px; }
+#add-template-form label { font-size: 14px; }
+@media (max-width: 900px) {
+  #settings-panel { padding: 8px; }
+  #settings-form label { flex: 1 1 100%; }
+  #settings-form input, #settings-form select { min-width: 80px; }
+  #settings-actions { flex-direction: column; gap: 8px; }
+  #template-list { flex-direction: column; }
+  .template-card { min-width: 90%; max-width: 100%; }
+}
+</style>
+<div id="settings-panel">
+  <h2><%:全局设置%></h2>
+  <form id="settings-form" autocomplete="off">
+    <label><%:启用%>:
+      <select name="enabled">
+        <option value="1"><%:启用%></option>
+        <option value="0"><%:禁用%></option>
+      </select>
+    </label>
+    <label><%:AC名称%>: <input type="text" name="ac_name"></label>
+    <label><%:AC IP%>: <input type="text" name="ac_ip"></label>
+    <label><%:子网%>: <input type="text" name="subnet"></label>
+    <label><%:网关%>: <input type="text" name="gateway"></label>
+    <label><%:网络模式%>: 
+      <select name="network_mode">
+        <option value="dhcp"><%:DHCP%></option>
+        <option value="static"><%:静态%></option>
+      </select>
+    </label>
+    <label><%:UDP端口%>: <input type="number" name="udp_port"></label>
+    <label><%:UDP广播地址%>: <input type="text" name="udp_broadcast"></label>
+    <label><%:UDP超时时间(秒)%>: <input type="number" name="udp_timeout"></label>
+    <label><%:UDP重试次数%>: <input type="number" name="udp_retry"></label>
+    <label><%:WebSocket端口%>: <input type="number" name="ws_port"></label>
+    <label><%:日志级别%>: <input type="text" name="log_level"></label>
+    <label><%:日志保留天数%>: <input type="number" name="log_rotate_days"></label>
+    <label><%:趋势数据库路径%>: <input type="text" name="trend_db"></label>
+    <label><%:RADIUS服务器%>: <input type="text" name="radius_server"></label>
+    <label><%:RADIUS密钥%>: <input type="password" name="radius_secret"></label>
+    <label><%:固件存储上限(MB)%>: <input type="number" name="firmware_retention"></label>
+    <div style="flex-basis:100%;height:0;"></div>
+    <button type="button" id="save-settings"><%:保存设置%></button>
+    <button type="button" id="load-settings"><%:回读配置%></button>
+    <button type="button" id="test-radius"><%:测试RADIUS%></button>
+  </form>
+  <div id="settings-actions">
+    <button id="template-manage-btn"><%:配置模板管理%></button>
+    <button id="role-manage-btn"><%:权限管理%></button>
+    <button id="factory-reset-btn"><%:恢复出厂设置并重启%></button>
+    <button id="show-storage-btn"><%:存储空间信息%></button>
+  </div>
+  <div id="settings-msg"></div>
+  <div id="log-storage-usage"></div>
+
+  <!-- 配置模板管理2列卡片视图 -->
+  <div id="template-manage-view">
+    <h3 style="margin:18px 0 12px 0;"><%:配置模板管理%></h3>
+    <button id="add-template-btn"><%:新增模板%></button>
+    <div id="add-template-form">
+      <label><%:模板名称%>:<input type="text" id="tpl-name"></label>
+      <label><%:厂商%>:<input type="text" id="tpl-vendor"></label>
+      <label><%:配置内容(JSON)%>:<textarea id="tpl-config" rows="4"></textarea></label>
+      <button id="tpl-save-btn"><%:保存%></button>
+      <button id="tpl-cancel-btn"><%:取消%></button>
+    </div>
+    <div id="template-list"></div>
+  </div>
+</div>
+<script src="<%=resource%>/wifi-ac/js/settings.js"></script>
+<script>
+// 增加回读按钮事件，主动从后端拉取UCI配置并填充表单
+document.getElementById("load-settings").onclick = function() {
+  fetch(L.env.cgiBase + "/admin/network/wifi_ac/api/settings")
+    .then(r => r.json())
+    .then(data => {
+      Object.keys(data).forEach(k => {
+        let el = document.querySelector(`[name="${k}"]`);
+        if (el) el.value = data[k];
+      });
+      document.getElementById("settings-msg").innerText = "<%:配置已回读%>";
+    });
+};
+
+// 配置模板管理卡片视图逻辑
+document.getElementById("template-manage-btn").onclick = function() {
+  document.getElementById("template-manage-view").style.display = "block";
+  loadTemplateList();
+};
+function loadTemplateList() {
+  fetch(L.env.cgiBase + "/admin/network/wifi_ac/api/template_manage")
+    .then(r => r.json())
+    .then(res => {
+      let list = res.templates || [];
+      let html = "";
+      list.forEach(tpl => {
+        html += `<div class="template-card">
+          <h4>${tpl.name || ""}</h4>
+          <div class="tpl-vendor">${_("厂商")}: ${tpl.vendor || ""}</div>
+          <pre>${tpl.config ? (typeof tpl.config === "string" ? tpl.config : JSON.stringify(tpl.config, null, 2)) : ""}</pre>
+          <div class="tpl-actions">
+            <button onclick="editTemplate('${tpl.name||""}','${tpl.vendor||""}',\`${tpl.config ? (typeof tpl.config === "string" ? tpl.config : JSON.stringify(tpl.config, null, 2)) : ""}\`)">${_("编辑")}</button>
+            <button onclick="deleteTemplate('${tpl.name||""}')">${_("删除")}</button>
+          </div>
+        </div>`;
+      });
+      document.getElementById("template-list").innerHTML = html;
+    });
+}
+document.getElementById("add-template-btn").onclick = function() {
+  document.getElementById("add-template-form").style.display = "block";
+  document.getElementById("tpl-name").value = "";
+  document.getElementById("tpl-vendor").value = "";
+  document.getElementById("tpl-config").value = "";
+};
+document.getElementById("tpl-cancel-btn").onclick = function() {
+  document.getElementById("add-template-form").style.display = "none";
+};
+document.getElementById("tpl-save-btn").onclick = function() {
+  let name = document.getElementById("tpl-name").value.trim();
+  let vendor = document.getElementById("tpl-vendor").value.trim();
+  let config = document.getElementById("tpl-config").value.trim();
+  if (!name || !config) return alert(_("模板名称和配置必填"));
+  fetch(L.env.cgiBase + "/admin/network/wifi_ac/api/template_manage", {
+    method: "POST",
+    body: new URLSearchParams({name, vendor, config})
+  }).then(r => r.json()).then(res => {
+    alert(res.msg || "");
+    if (res.code === 0) {
+      document.getElementById("add-template-form").style.display = "none";
+      loadTemplateList();
+    }
+  });
+};
+window.editTemplate = function(name, vendor, config) {
+  document.getElementById("add-template-form").style.display = "block";
+  document.getElementById("tpl-name").value = name;
+  document.getElementById("tpl-vendor").value = vendor;
+  document.getElementById("tpl-config").value = config;
+};
+window.deleteTemplate = function(name) {
+  if (!confirm(_("确定删除模板?"))) return;
+  fetch(L.env.cgiBase + "/admin/network/wifi_ac/api/template_manage", {
+    method: "DELETE",
+    body: new URLSearchParams({name})
+  }).then(r => r.json()).then(res => {
+    alert(res.msg || "");
+    loadTemplateList();
+  });
+};
+</script>
+<%+footer%>
+

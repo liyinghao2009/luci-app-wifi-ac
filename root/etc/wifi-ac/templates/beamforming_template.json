@@ -1,0 +1,9 @@
+{
+  "name": "波束赋形高性能",
+  "vendor": "default",
+  "config": {
+    "channel": "11",
+    "tx_power": 18,
+    "beamforming": "high"
+  }
+}

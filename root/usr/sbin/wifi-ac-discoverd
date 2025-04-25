@@ -1,0 +1,112 @@
+#!/bin/sh
+
+CONFIG=/etc/wifi-ac/config.json
+TMPDIR=/tmp/wifi-ac
+OUTFILE=$TMPDIR/discovered_devices.json
+PERIOD=30
+
+LOGDIR=/var/log/wifi-ac
+LOGFILE=$LOGDIR/discover.log
+[ -d "$LOGDIR" ] || mkdir -p "$LOGDIR"
+[ -d "$TMPDIR" ] || mkdir -p "$TMPDIR"
+
+log_info() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [INFO] $*" >> $LOGFILE
+}
+log_warn() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [WARNING] $*" >> $LOGFILE
+}
+
+[ -f "$CONFIG" ] && PERIOD=$(jsonfilter -i $CONFIG -e '@.period' 2>/dev/null || echo 30)
+
+get_ac_ip() {
+    ip addr show br-lan 2>/dev/null | awk '/inet /{print $2}' | cut -d/ -f1 | head -n1
+}
+
+send_discover() {
+    local ac_ip=$(get_ac_ip)
+    echo '{"type":"discover","version":"1.0","ac_ip":"'"$ac_ip"'"}' | \
+        nc -w1 -u 255.255.255.255 49152
+}
+
+parse_response() {
+    # 这里只做简单演示，实际应用建议用C/lua+libubox解析
+    # 假设收到的响应为JSON，每行为一个设备
+    cat $TMPDIR/udp_response.txt | while read line; do
+        mac=$(echo "$line" | jsonfilter -e '@.mac')
+        oui=$(echo "$mac" | awk -F: '{print tolower($1 ":" $2 ":" $3)}')
+        vendor=""
+        model=""
+        fw=""
+        if [ "$oui" = "00:18:0a" ]; then
+            vendor="huawei"
+            model=$(echo "$line" | jsonfilter -e '@.model')
+            fw=$(echo "$line" | jsonfilter -e '@.firmware_version')
+        elif [ "$oui" = "00:0d:66" ]; then
+            vendor="tplink"
+            model=$(echo "$line" | jsonfilter -e '@.model')
+            fw=$(echo "$line" | jsonfilter -e '@.firmware_version')
+        fi
+        ip=$(echo "$line" | jsonfilter -e '@.ip')
+        [ -n "$mac" ] && echo "{\"mac\":\"$mac\",\"ip\":\"$ip\",\"vendor\":\"$vendor\",\"model\":\"$model\",\"firmware_version\":\"$fw\",\"discovered_time\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+        [ -n "$mac" ] && log_info "Discovered device: $mac ($vendor $model) at $ip"
+    done
+}
+
+status_monitor() {
+    # 优化：批量收集变化的设备，仅推送变化项
+    macs=$(uci show wifi_ac | grep ".mac=" | cut -d"'" -f2)
+    changed_devices=""
+    for mac in $macs; do
+        signal=$(iw dev wlan0 station dump 2>/dev/null | grep -A 5 "$mac" | awk '/signal:/ {print $2}')
+        signal=${signal:-"-100"}
+        arp_entry=$(arp -n | grep -i "$mac")
+        if [ -n "$arp_entry" ]; then
+            status="online"
+        else
+            status="offline"
+        fi
+        reason=""
+        if [ "$status" = "offline" ] && [ "$signal" -lt "-85" ]; then
+            reason="signal_weak"
+        elif [ "$status" = "offline" ]; then
+            reason="interface_down"
+        fi
+        event_data="{\"mac\":\"$mac\",\"status\":\"$status\",\"reason\":\"$reason\",\"signal\":$signal}"
+        last_status=$(uci get wifi_ac.device.$mac.status 2>/dev/null)
+        last_reason=$(uci get wifi_ac.device.$mac.reason 2>/dev/null)
+        if [ "$last_status" != "$status" ] || [ "$reason" != "$last_reason" ]; then
+            # 仅收集变化的设备
+            if [ -z "$changed_devices" ]; then
+                changed_devices="[$event_data"
+            else
+                changed_devices="$changed_devices,$event_data"
+            fi
+            uci set wifi_ac.device.$mac.status="$status"
+            uci set wifi_ac.device.$mac.reason="$reason"
+        fi
+    done
+    if [ -n "$changed_devices" ]; then
+        changed_devices="$changed_devices]"
+        ubus call wifi_ac publish_status_update "$changed_devices"
+        uci commit wifi_ac
+    fi
+}
+
+main_loop() {
+    while true; do
+        send_discover
+        timeout 2 nc -u -l -p 49152 > $TMPDIR/udp_response.txt
+        parse_response > $OUTFILE
+        # 清理5分钟前的记录
+        touch -d '5 min ago' $TMPDIR/expire
+        find $TMPDIR -name 'discovered_devices.json' -not -newer $TMPDIR/expire -delete
+
+        # 状态检测
+        status_monitor
+
+        sleep $PERIOD
+    done
+}
+
+main_loop

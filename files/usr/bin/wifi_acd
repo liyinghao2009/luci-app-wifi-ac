@@ -1,0 +1,50 @@
+#!/bin/sh
+# WiFi AC 守护进程主程序
+
+[ -d /tmp/wifi-ac ] || mkdir -p /tmp/wifi-ac   # 修复点
+
+last_status_file="/tmp/wifi_ac_last_status.json"
+
+get_status() {
+    local section="$1"
+    config_get mac "$section" mac
+    [ -z "$mac" ] && return
+    status_json=$(ubus call wifi.status "{\"mac\":\"$mac\"}")
+    [ -z "$status_json" ] && return
+
+    # 解析状态
+    status=$(echo "$status_json" | jsonfilter -e '@.status')
+    signal=$(echo "$status_json" | jsonfilter -e '@.signal')
+    reason=""
+    if [ "$status" = "offline" ]; then
+        reason=$(ubus call wifi_ac get_offline_reason "{\"mac\":\"$mac\"}" 2>/dev/null | jsonfilter -e '@.reason')
+    fi
+
+    # 记录当前状态
+    echo "{\"mac\":\"$mac\",\"status\":\"$status\",\"reason\":\"$reason\",\"signal\":$signal}" >> /tmp/wifi_ac_status_batch.json
+}
+
+while true; do
+    # 获取所有设备MAC
+    > /tmp/wifi_ac_status_batch.json
+    config_load wifi_ac
+    config_foreach get_status device
+
+    # 检查状态是否有变化，有变化则推送
+    if ! cmp -s /tmp/wifi_ac_status_batch.json "$last_status_file"; then
+        cp /tmp/wifi_ac_status_batch.json "$last_status_file"
+        devices_json=$(cat /tmp/wifi_ac_status_batch.json | jq -s .)
+        ubus call wifi_ac publish_status_update "$devices_json"
+    fi
+
+    sleep 5
+done
+
+# 定时mDNS发现
+while true; do
+  # mDNS发现（需ap_agent支持，示例用avahi-browse）
+  avahi-browse -rt _workstation._tcp | grep address | awk '{print $4}' | jq -s . > /tmp/wifi-ac/mdns_devices.json
+  # HTTP注册发现（需ap_agent支持，示例用curl拉取注册列表）
+  curl -s http://127.0.0.1:9001/api/ap_register_list > /tmp/wifi-ac/http_devices.json
+  sleep 60
+done

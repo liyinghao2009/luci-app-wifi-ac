@@ -1,0 +1,126 @@
+# WiFi AC 控制器 UCI 配置模板（建议根据实际环境调整）
+# 全局参数
+config wifi_ac 'global'
+	option enabled '1'
+	option ac_name 'MyWiFiAC'
+	option ap_ip '0.0.0.0'         # 启动时由脚本自动获取并写入
+	option subnet '0.0.0.0/0'      # 启动时由脚本自动获取并写入
+	option gateway '0.0.0.0'       # 启动时由脚本自动获取并写入
+	option network_mode 'dhcp'
+	option udp_port '9090'
+	option udp_broadcast '255.255.255.255'
+	option udp_timeout '2'
+	option udp_retry '2'
+	option ws_port '9001'
+	option log_level 'info'
+	option log_rotate_days '7'
+	option trend_db '/etc/wifi-ac/performance.db'
+
+# RADIUS认证配置
+config radius 'main'
+	option server '192.168.1.100'
+	option port '1812'
+	option secret 'radius_secret'
+	option enable '0'
+
+# 优化参数
+config optimize 'default'
+	option max_clients '32'
+	option strategy 'balance'
+	option auto_interval '3600'
+
+# 固件仓库与存储策略
+config firmware 'repo'
+	option path '/etc/wifi-ac/firmware'
+	option auto_clean_days '30'
+
+config storage 'policy'
+	option log_keep_days '7'
+	option auto_clean '1'
+	option firmware_retention '512' # 单位MB
+
+# 角色与权限管理
+config role_manage 'admin'
+	option role 'admin'
+	option desc '系统管理员'
+	list users 'root'
+
+config role_manage 'operator'
+	option role 'operator'
+	option desc '运维操作员'
+	list users 'admin'
+	list users 'ops'
+
+config role_manage 'auditor'
+	option role 'auditor'
+	option desc '审计员'
+	list users 'audit'
+
+# 配置模板（支持多厂商/多场景）
+config template_manage 'tpl_huawei'
+	option name 'Huawei标准模板'
+	option vendor 'Huawei'
+	option config '{"ssid":"Huawei-AP","channel":6,"txpower":20}'
+
+config template_manage 'tpl_openwrt'
+	option name 'OpenWrt标准模板'
+	option vendor 'OpenWrt'
+	option config '{"ssid":"OpenWrt-AP","channel":1,"txpower":17}'
+
+config template_manage 'tpl_tplink'
+	option name 'TP-Link标准模板'
+	option vendor 'TP-Link'
+	option config '{"ssid":"TPLINK-AP","channel":11,"txpower":18}'
+
+config template_manage 'tpl_vlan'
+	option name 'VLAN模板示例'
+	option vendor 'default'
+	option config '{"channel":6,"tx_power":20,"vlan_id":100}'
+
+config template_manage 'tpl_high_coverage'
+	option name '高覆盖模式'
+	option vendor 'tp-link'
+	option config '{"channel":11,"tx_power":14,"beamforming":"low","load_balance":{"threshold":40,"strategy":"power_adjust"}}'
+
+# 设备配置示例（可批量添加）
+config device
+	option mac 'AA:BB:CC:DD:EE:FF'
+	option ip '192.168.1.10'
+	option vendor 'Huawei'
+	option model 'AP123'
+	option firmware 'v1.0.2'
+	option lb_threshold '32'
+	option lb_strategy 'balance'
+	option enable '1'
+
+config device
+	option mac 'AA:BB:CC:DD:EE:11'
+	option ip '192.168.1.11'
+	option vendor 'TP-Link'
+	option model 'EAP245'
+	option firmware 'v2.1.0'
+	option lb_threshold '40'
+	option lb_strategy 'priority'
+	option enable '1'
+
+config device
+	option mac 'AA:BB:CC:DD:EE:22'
+	option ip '192.168.1.12'
+	option vendor 'Ruijie'
+	option model 'RG-AP720'
+	option firmware 'v3.0.5'
+	option lb_threshold '30'
+	option lb_strategy 'balance'
+	option enable '1'
+
+config device
+	option mac 'AA:BB:CC:DD:EE:33'
+	option ip '192.168.1.13'
+	option vendor 'OpenWrt'
+	option model 'Generic'
+	option firmware 'v21.02'
+	option lb_threshold '32'
+	option lb_strategy 'balance'
+	option enable '1'
+
+# ...可继续扩展更多设备、模板、角色...

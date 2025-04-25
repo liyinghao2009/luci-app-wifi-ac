@@ -1,0 +1,108 @@
+<%+header%>
+<style>
+#log-panel { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px #eee; padding: 24px; max-width: 1100px; margin: 24px auto; }
+#log-panel h2 { font-size: 1.3em; margin-bottom: 18px; }
+#log-filter-bar { margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#log-filter-bar input, #log-filter-bar select { padding: 4px 8px; border-radius: 3px; border: 1px solid #ccc; }
+#log-filter-bar button { background: #409eff; color: #fff; border: none; border-radius: 3px; padding: 5px 16px; margin-right: 6px; cursor: pointer; }
+#log-filter-bar button:active { background: #66b1ff; }
+#log-table { width:100%; border-collapse:collapse; margin-top:12px; }
+#log-table th, #log-table td { border:1px solid #e5e5e5; padding:7px 6px; text-align:center; }
+#log-table th { background:#f5f7fa; color:#333; }
+#log-alarm { color:#e67c23; font-weight:bold; margin-top:10px; }
+#log-storage-usage { color:#888; margin:10px 0 0 0; font-size:13px; }
+@media (max-width: 900px) {
+  #log-panel { padding: 8px; }
+  #log-table th, #log-table td { font-size: 12px; padding: 4px 2px; }
+  #log-filter-bar { flex-direction: column; align-items: stretch; gap: 4px; }
+}
+</style>
+<div id="log-panel">
+  <h2><%:日志系统%></h2>
+  <div id="log-filter-bar">
+    <input type="text" id="log-keyword" placeholder="<%:关键字%>">
+    <select id="log-type">
+      <option value=""><%:全部类型%></option>
+      <option value="info"><%:信息%></option>
+      <option value="warn"><%:警告%></option>
+      <option value="error"><%:错误%></option>
+    </select>
+    <input type="text" id="log-vendor" placeholder="<%:厂商%>">
+    <input type="text" id="log-user" placeholder="<%:用户%>">
+    <input type="date" id="log-since" placeholder="<%:起始日期%>">
+    <input type="date" id="log-until" placeholder="<%:结束日期%>">
+    <button id="log-search"><%:查询%></button>
+    <button id="log-export-csv"><%:导出CSV%></button>
+    <button id="log-export-pdf"><%:导出PDF%></button>
+  </div>
+  <table id="log-table">
+    <thead>
+      <tr>
+        <th><%:时间%></th>
+        <th><%:类型%></th>
+        <th><%:厂商%></th>
+        <th><%:用户%></th>
+        <th><%:消息%></th>
+        <th><%:详情%></th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- JS渲染 -->
+    </tbody>
+  </table>
+  <div id="log-alarm"></div>
+  <div id="log-storage-usage"></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="<%=resource%>/wifi-ac/js/log.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // 日志存储占用展示
+  fetch(L.env.cgiBase + "/admin/network/wifi_ac/api/storage_info")
+    .then(r => r.json())
+    .then(res => {
+      document.getElementById("log-storage-usage").innerText = "日志空间占用: " + (res.storage || "");
+    });
+
+  // 日志API权限细粒度控制
+  let perms = window.L && window.L.env && window.L.env.permissions;
+  if (perms && !perms.includes("log_export")) {
+    document.getElementById("log-export-csv").style.display = "none";
+    document.getElementById("log-export-pdf").style.display = "none";
+  }
+  if (perms && !perms.includes("log_query")) {
+    document.getElementById("log-search").style.display = "none";
+  }
+
+  // 日志导出PDF美化
+  document.getElementById("log-export-pdf").onclick = function() {
+    fetch(L.env.cgiBase + "/admin/network/wifi_ac/api/log?export=pdf")
+      .then(r => r.text())
+      .then(pdfText => {
+        if (window.pdfMake) {
+          var docDefinition = {
+            content: [
+              { text: 'WiFi-AC 日志导出', style: 'header' },
+              { text: new Date().toLocaleString(), style: 'subheader' },
+              { text: pdfText, style: 'logtext', fontSize: 10 }
+            ],
+            styles: {
+              header: { fontSize: 18, bold: true, margin: [0,0,0,10] },
+              subheader: { fontSize: 12, margin: [0,0,0,10] },
+              logtext: { fontSize: 10 }
+            }
+          };
+          pdfMake.createPdf(docDefinition).download("wifi-ac-log.pdf");
+        } else {
+          let blob = new Blob([pdfText], {type: "application/pdf"});
+          let a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "wifi-ac-log.pdf";
+          a.click();
+        }
+      });
+  };
+});
+</script>
+<%+footer%>
